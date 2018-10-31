@@ -1,0 +1,420 @@
+{% extends 'main.html' %}
+{% block content %}
+    {% load tag_tools %}
+    {% load static %}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="tile">
+                <div class="tile-body">
+                    <h3 class="tile-title">请求调试&nbsp;&nbsp;&nbsp;<span style="color:red;font-size:15px;"
+                                                                       id="error_xml"></span></h3>
+                    <form class="row" action="" method="POST" id="form_automation">
+                        {% csrf_token %}
+                        <div class="form-group col-md-12">
+                            <label class="control-label">Basesvn</label>
+                            <textarea class="form-control" rows="5" id="qo_basesvn" name="qo_basesvn"
+                                      placeholder='job.ini[main.svn]'
+                            ></textarea>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label">Testsvn</label>
+                            <textarea class="form-control" rows="5" id="qo_testsvn" name="qo_testsvn"
+                                      placeholder='job.ini[main.svn]'
+                            ></textarea>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">testtag</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" id="testtag" name="testtag"
+                                       placeholder="branch多次提交可此处备注区分">
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">newcfg</label>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="new_conf_ip" name="new_conf_ip"
+                                       placeholder="conf file@ip">
+                            </div>
+                            <div class="col-md-3">
+
+                                <input type="text" class="form-control" id="new_conf_user" name="new_conf_user"
+                                       placeholder="user">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="new_conf_pass" name="new_conf_pass"
+                                       placeholder="password">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">cfgpath</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="new_conf_path" name="new_conf_path"
+                                       placeholder="path(e.g.)/search/odin/daemon/qo/conf/qo.cfg(绝对路径)">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">newdata</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="new_data_ip" name="new_data_ip"
+                                       placeholder="data file@ip">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="new_data_user" name="new_data_user"
+                                       placeholder="user">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="new_data_pass" name="new_data_pass"
+                                       placeholder="password">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">datafrom</label>
+                            <div class="col-md-10">
+                                <textarea class="form-control" rows="4" name="new_data_path" id="new_data_path"
+                                          placeholder='1.使用和线上一致的数据，置空&#13;&#10;2.更新单独文件/search/odin/daemon/qo/data/vocab.txt;data/base/nb&#13;&#10;3.更新多文件/search/odin/daemon/zhangjj/tools/qo/data/{template.lst,tflag_qo.xml};data/base&#13;&#10;4.完全使用自有完整数据(需支持rsync)/search/odin/daemon/zhangjj/tools/qo/data;data'></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">exp_id</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="qo_press_expid" name="qo_press_expid"
+                                       placeholder="expid">
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" id="qo_press_rate" name="qo_press_rate"
+                                       placeholder="实验配比1-100(无需百分号%)">
+                            </div>
+                            <div class="col-sm-1">
+                                <label class="col-sm-1 control-label">(%)</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">选项</label>
+                            <div class="col-md-10">
+                                <div class="form-check">
+                                    <label class="form-check-label col-sm-5">
+                                        <input class="form-check-input" type="radio" name="radio_select" value="press"
+                                               checked>press
+                                    </label>
+                                    <label class="form-check-label col-sm-5">
+                                        <input class="form-check-input" type="radio" name="radio_select"
+                                               value="longdiff">diff
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">presscfg</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="qo_qps" name="qo_qps"
+                                       placeholder="press qps默认1000">
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="qo_press_time" name="qo_press_time"
+                                       placeholder="press time默认30min">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">queryCfg</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="query_ip" name="query_ip"
+                                       placeholder="ip">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="query_user" name="query_user"
+                                       placeholder="user">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="query_pwd" name="query_pwd"
+                                       placeholder="password">
+
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 row">
+                            <label class="control-label col-md-2">queryPath</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="query_path" name="query_path"
+                                       placeholder="path">
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" id="add_automation" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>添加队列
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-md-7">
+            <div class="tile">
+                <h3 class="tile-title">列表</h3>
+                <table class="table" id="reqData">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>StartTime</th>
+                        <th>ExpId</th>
+                        <th>Rate</th>
+                        <th>Testtag</th>
+                        <th>Status</th>
+                        <th>TestItem</th>
+                        <th>User</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reqBody">
+                    {% for item in req_lst %}
+                        <tr id="get_data">
+                            <td>{{ item.id }}</td>
+                            <td style="display: none;">{{ item.create_time }}</td>
+                            <td>{{ item.start_time }}</td>
+                            <td>{{ item.press_expid }}</td>
+                            <td>{{ item.press_rate }}</td>
+                            <td>{{ item.testtag }}</td>
+                            <td>
+                                <a href="/webqo/auto/auto_detail_{{ item.id }}.html">
+                                    {% ifequal item.status 0 %}
+                                        <font color="gray">Waiting</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 1 %}
+                                        <font color="cream">Ready</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 2 %}
+                                        <font color="green">Running</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 3 %}
+                                        <font color="red">Error</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 4 %}
+                                        <font color="blue">Finished</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 5 %}
+                                        <font color="orange">Canceled</font>
+                                    {% endifequal %}
+                                    {% ifequal item.status 6 %}
+                                        <font color="orange">Canceling</font>
+                                    {% endifequal %}
+                                </a>
+                            </td>
+                            {% ifequal item.testitem 1 %}
+                                <td>cost</td>
+                            {% else %}
+                                <td>diff</td>
+                            {% endifequal %}
+                            <td>{{ item.user }}</td>
+                            <td style="display: none;">{{ item.testsvn }}</td>
+                            <td style="display: none;">{{ item.basesvn }}</td>
+                            <td style="display: none;">{{ item.newconfip }}</td>
+                            <td style="display: none;">{{ item.newconfuser }}</td>
+                            <td style="display: none;">{{ item.newconfpassw }}</td>
+                            <td style="display: none;">{{ item.newconfpath }}</td>
+                            <td style="display: none;">{{ item.newdataip }}</td>
+                            <td style="display: none;">{{ item.newdatauser }}</td>
+                            <td style="display: none;">{{ item.newdatapassw }}</td>
+                            <td style="display: none;">{{ item.newdatapath }}</td>
+                            <td style="display: none;">{{ item.press_qps }}</td>
+                            <td style="display: none;">{{ item.press_time }}</td>
+                            <td style="display: none;">{{ item.query_ip }}</td>
+                            <td style="display: none;">{{ item.query_user }}</td>
+                            <td style="display: none;">{{ item.query_pwd }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {{ page_str }}
+                    </ul>
+                </nav>
+            </div>
+            <div id="showDiv"></div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        //判断ajax里面的方法是get还是post
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        //只要执行一次ajaxSetup进行header设置,就可以不用在没个ajax里面添加header信息了
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'))
+                }
+            }
+        });
+
+        //request
+        $('#add_automation').click(function () {
+            var qo_base_svn = $('#qo_basesvn').val()
+            var qo_text_svn = $('#qo_testsvn').val()
+            if (qo_base_svn != "" || qo_text_svn != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/webqo/auto/add",
+                    async: true,
+                    traditional: true,
+                    data: $('#form_automation').serialize(),
+                    dataType: 'JSON',
+                    success: function (obj) {
+                        console.log(obj.status)
+                        if (obj.status) {
+                            {#                            console.log(JSON.stringify($('#form_qo_addtask').serialize()))#}
+                            location.reload();
+                        } else {
+                            $('#error_xml').text(obj.error);
+                        }
+                    },
+                    error: function () {
+
+                    },
+                });
+                $('#error_xml').text('');
+            } else {
+                $('#error_xml').text('svn不可都为空');
+            }
+        })
+
+        //table hover
+        $(function () {
+            function showBox(obj, box) {
+                var timer = null;
+                $(obj).on("mouseover", function (e) {
+                    clearTimeout(timer);
+                    var clientX = e.clientX;
+                    var clientY = e.clientY;
+                    var y = clientY + 20;
+                    var txt = $(this).text();
+                    timer = setTimeout(function () {
+                        $(box).css("left", clientX).css("top", y);
+                        if (txt == "") {
+                            $(box).hide();
+                        } else {
+                            $(box).show();
+                            $(box).html(txt);
+                        }
+                    }, 300);
+                });
+                $(obj).on("mouseout", function () {
+                    clearTimeout(timer);
+                    $(box).hide();
+                });
+            }
+
+            showBox("#reqData > tbody td", "#showDiv");
+        });
+
+        //del
+        $('.del_line').click(function () {
+            var line_id = $(this).parent().parent().attr('req_id');
+            $.ajax({
+                type: "POST",
+                url: "del_xml_line",
+                async: true,
+                data: {
+                    'line_id': line_id
+                },
+                dataType: 'JSON',
+                success: function (obj) {
+                    if (obj.status) {
+                        location.reload();
+                    } else {
+                        $('#error_xml').text(obj.error);
+                    }
+                },
+                error: function () {
+
+                }
+            });
+
+        })
+
+        //getData
+        $('#get_data').dblclick(function () {
+            var linelst = $(this).children();
+            press_expid = $(linelst[3]).text();
+            press_rate = $(linelst[4]).text();
+            testtag = $(linelst[5]).text();
+            testsvn = $(linelst[9]).text();
+            basesvn = $(linelst[10]).text();
+            newconfip = $(linelst[11]).text();
+            newconfuser = $(linelst[12]).text();
+            newconfpassw = $(linelst[13]).text();
+            newconfpath = $(linelst[14]).text();
+            newdataip = $(linelst[15]).text();
+            newdatauser = $(linelst[16]).text();
+            newdatapassw = $(linelst[17]).text();
+            newdatapath = $(linelst[18]).text();
+            press_qps = $(linelst[19]).text();
+            press_time = $(linelst[20]).text();
+            query_ip = $(linelst[21]).text();
+            query_user = $(linelst[22]).text();
+            query_pwd = $(linelst[23]).text();
+            query_path = $(linelst[24]).text();
+
+            $('#qo_testsvn').val(testsvn);
+            $('#qo_basesvn').val(basesvn);
+            $('#new_conf_ip').val(newconfip);
+            $('#new_conf_user').val(newconfuser);
+            $('#new_conf_pass').val(newconfpassw);
+            $('#new_conf_path').val(newconfpath);
+            $('#new_data_ip').val(newdataip);
+            $('#new_data_user').val(newdatauser);
+            $('#new_data_pass').val(newdatapassw);
+            $('#new_data_path').val(newdatapath);
+            $('#qo_qps').val(press_qps);
+            $('#qo_press_time').val(press_time);
+            $('#qo_press_rate').val(press_rate);
+            $('#qo_press_expid').val(press_expid);
+            $('#testtag').val(testtag);
+            $('#query_ip').val(query_ip);
+            $('#query_user').val(query_user);
+            $('#query_pwd').val(query_pwd);
+            $('#query_path').val(query_path);
+
+        })
+
+
+        $(document).ready(function () {
+            $('#query_ip').attr('readonly', true);
+            $('#query_user').attr('readonly', true);
+            $('#query_pwd').attr('readonly', true);
+            $('#query_path').attr('readonly', true);
+
+            $('input[type=radio][name=radio_select]').change(function () {
+                if (this.value == 'press') {
+                    $('#query_ip').attr('readonly', true);
+                    $('#query_user').attr('readonly', true);
+                    $('#query_pwd').attr('readonly', true);
+                    $('#query_path').attr('readonly', true);
+
+                    $('#qo_qps').attr('readonly', false);
+                    $('#qo_press_time').attr('readonly', false);
+                }
+                else if (this.value == 'longdiff') {
+                    $('#qo_qps').attr('readonly', true);
+                    $('#qo_press_time').attr('readonly', true);
+
+                    $('#query_ip').attr('readonly', false);
+                    $('#query_user').attr('readonly', false);
+                    $('#query_pwd').attr('readonly', false);
+                    $('#query_path').attr('readonly', false);
+                }
+            });
+
+        });
+
+
+    </script>
+{% endblock %}
+
+
