@@ -37,3 +37,12 @@ class Qps(models.Model):
 
     testtag = models.CharField(max_length=500, default="")
 
+class DebugQo(models.Model):
+    host_ip = models.CharField(max_length=128)
+    exp_id = models.CharField(max_length=128)
+    query_from = models.CharField(max_length=4, default="")
+    query = models.CharField(max_length=2000)
+    result = models.CharField(max_length=2000)
+    c_time = models.DateTimeField(auto_now=True)
+    # user_fk = models.ForeignKey(to=UserInfo, to_field='username', on_delete=models.CASCADE)
+

@@ -1,0 +1,14 @@
+__pycache__/
+rbac/__pycache__/
+polls/__pycache__/
+fanyi/__pycache__/
+.idea/
+.project/
+.project
+*.pyc
+script/*.log
+script/uwsgi.pid
+log/
+media/
+diff.html
+

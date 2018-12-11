@@ -25,6 +25,12 @@ from . import views
 
 app_name = 'webqo'
 urlpatterns = [
+    # debug
+    re_path(r'^debug/$', views.debug),
+    re_path(r'^debug/del$', views.debug_del),
+    re_path(r'^debug/save$', views.debug_save),
+    re_path(r'^debug/diff$', views.debug_diff),
+    # auto
     re_path(r'^auto(?P<page_id>\d*)/$', views.auto),
     re_path(r'^auto/add', views.auto_add),
     re_path(r'^auto/auto_detail_(?P<task_id>\d+).html$', views.auto_detail),

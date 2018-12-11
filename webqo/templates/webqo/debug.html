@@ -1,0 +1,334 @@
+{% extends 'main.html' %}
+{% block content %}
+    {% load static %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="tile-body">
+                    <h3 class="tile-title">请求调试&nbsp;&nbsp;&nbsp;<span style="color:red;font-size:15px;"
+                                                                       id="error_xml"></span></h3>
+                    <form class="row" id="form_xml" action="." method="POST">
+                        {% csrf_token %}
+                        <div class="form-group col-md-6">
+                            <label class="control-label">Single:</label>
+                            <input class="form-control" type="text" id="inputHost" name="inputHost"
+                                   value="http://webqo01.web.djt.ted:8012/request">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="control-label">&nbsp;</label>
+                            <input class="form-control" type="text" id="inputExpId" name="inputExpId"
+                                   placeholder="ExpId">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="control-label">&nbsp;</label>
+                            <input class="form-control" type="text" id="query_from" name="query_from"
+                                   placeholder="from">
+
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="control-label">Diff:</label>
+                            <input class="form-control" type="text" id="inputHost_diff" name="inputHost_diff"
+                                   value="http://webqo01.web.djt.ted:8012/request">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="control-label">&nbsp;</label>
+                            <input class="form-control" type="text" id="inputExpId_diff" name="inputExpId_diff"
+                                   placeholder="ExpId">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="control-label">&nbsp;</label>
+                            <input class="form-control" type="text" id="query_from_diff" name="query_from_diff"
+                                   placeholder="from">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <textarea class="form-control" rows="4" id="query" name="query" placeholder="请求"
+                        ></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="tile-footer">
+                    <button class="btn btn-primary" id="start_debug" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>开始调试
+                    </button>
+                    &nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" id="save_debug" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>保存请求
+                    </button>
+                    &nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary" id="start_diff" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>diff
+                    </button>
+                </div>
+
+            </div>
+            <div class="tile">
+                <h3 class="tile-title">列表</h3>
+                <table class="table" id="reqData">
+                    <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>Host</th>
+                        <th>ExpId</th>
+                        <th>queryFrom</th>
+                        <th>请求</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reqBody">
+                    {% for item in req_lst %}
+                        <tr req_id="{{ item.id }}" class="get_data">
+                            <td>{{ item.c_time | date:"Y/m/d H:i" }}</td>
+                            <td>{{ item.host_ip }}</td>
+                            <td>{{ item.exp_id }}</td>
+                            <td>{{ item.query_from }}</td>
+                            <td>{{ item.query }}</td>
+                            <td>
+                                <button class="del_debug">删除</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {{ page_str }}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="tile" style="height: 690px;overflow-y: scroll">
+                <h3 class="tile-title">结果</h3>
+                <textarea class="form-control" rows="27" id="result" name="result"></textarea>
+                <div id="result_diff"></div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="col-md-6">
+
+        </div>
+
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        //判断ajax里面的方法是get还是post
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        //只要执行一次ajaxSetup进行header设置,就可以不用在没个ajax里面添加header信息了
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'))
+                }
+            }
+        });
+        //save
+        $('#save_debug').click(function () {
+            var inputHost = $('#inputHost').val()
+            var inputExpId = $('#inputExpId').val()
+            var query_from = $('#query_from').val()
+            var query = $('#query').val()
+
+            if (query != "" && inputHost != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/webqo/debug/save",
+                    async: true,
+                    traditional: true,
+                    data: {
+                        'inputHost': inputHost,
+                        'inputExpId': inputExpId,
+                        'query_from': query_from,
+                        'query': query
+                    },
+                    dataType: 'JSON',
+                    success: function (obj) {
+                        if (obj.status) {
+                            location.reload();
+                        } else {
+                            $('#error_xml').text(obj.error);
+                        }
+                    },
+                    error: function () {
+
+                    },
+                });
+                $('#error_xml').text('');
+            } else {
+                if (query == '') {
+                    $('#error_xml').text('Request不可为空。');
+                } else if (inputHost == '') {
+                    $('#error_xml').text('Host不可为空。');
+                } else {
+                    $('#error_xml').text('未知错误。');
+                }
+            }
+        })
+
+        //query
+        $('#start_debug').click(function () {
+            var query = $('#query').val()
+            var inputHost = $('#inputHost').val()
+            var query_from = $('#query_from').val()
+            var inputExpId = $('#inputExpId').val()
+
+            if (query != "" && inputHost != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/webqo/debug/",
+                    async: true,
+                    traditional: true,
+                    data: $('#form_xml').serialize(),
+                    dataType: 'JSON',
+                    success: function (ret) {
+                        if (ret.status) {
+                            $('#result_diff').hide()
+                            $('#result').show()
+                            $('#result').text(ret.data)
+                        } else {
+                            $('#error_xml').text(ret.error)
+
+                        }
+
+                    },
+                    error: function () {
+
+                    },
+                });
+                $('#error_xml').text('');
+            } else {
+                if (query == '') {
+                    $('#error_xml').text('Request不可为空');
+                } else if (inputHost == '') {
+                    $('#error_xml').text('Host不可为空');
+                } else {
+                    $('#error_xml').text('未知错误');
+                }
+            }
+        })
+
+        //diff
+        $('#start_diff').click(function () {
+            var query = $('#query').val()
+            var query_from = $('#query_from').val()
+            var inputHost = $('#inputHost').val()
+            var inputExpId = $('#inputExpId').val()
+
+            var inputHost_diff = $('#inputHost_diff').val()
+            var inputExpId_diff = $('#inputExpId_diff').val()
+            var query_from_diff = $('#query_from_diff').val()
+
+            if (query != "" && inputHost != "" && inputHost_diff != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/webqo/debug/diff",
+                    async: true,
+                    traditional: true,
+                    data: {
+                        'inputHost': inputHost,
+                        'inputExpId': inputExpId,
+                        'query_from': query_from,
+                        'query': query,
+                        'inputHost_diff': inputHost_diff,
+                        'inputExpId_diff': inputExpId_diff,
+                        'query_from_diff': query_from_diff
+                    },
+                    dataType: 'JSON',
+                    success: function (ret) {
+                        if (ret.status) {
+                            $('#result').hide()
+                            $('#result_diff').show()
+                            $('#result_diff').html(ret.data)
+                        } else {
+                            $('#error_xml').text(ret.error)
+                        }
+                    },
+                    error: function () {
+                    },
+                });
+                $('#error_xml').text('');
+            } else {
+                if (query == '') {
+                    $('#error_xml').text('Request不可为空');
+                } else if (inputHost == '') {
+                    $('#error_xml').text('Host不可为空');
+                } else {
+                    $('#error_xml').text('未知错误');
+                }
+            }
+        })
+
+        //table hover
+        $(function () {
+            function showBox(obj, box) {
+                var timer = null;
+                $(obj).on("mouseover", function (e) {
+                    clearTimeout(timer);
+                    var clientX = e.clientX;
+                    var clientY = e.clientY;
+                    var y = clientY + 20;
+                    var txt = $(this).text();
+                    timer = setTimeout(function () {
+                        $(box).css("left", clientX).css("top", y);
+                        if (txt == "") {
+                            $(box).hide();
+                        } else {
+                            $(box).show();
+                            $(box).html(txt);
+                        }
+                    }, 300);
+                });
+                $(obj).on("mouseout", function () {
+                    clearTimeout(timer);
+                    $(box).hide();
+                });
+            }
+
+            showBox("#reqData > tbody td", "#showDiv");
+        });
+
+        //del
+        $('.del_debug').click(function () {
+            var line_id = $(this).parent().parent().attr('req_id');
+            $.ajax({
+                type: "POST",
+                url: "/webqo/debug/del",
+                async: true,
+                data: {
+                    'line_id': line_id
+                },
+                dataType: 'JSON',
+                success: function (obj) {
+                    if (obj.status) {
+                        location.reload();
+                    } else {
+                        $('#error_xml').text(obj.error);
+                    }
+                },
+                error: function () {
+
+                }
+            });
+
+        })
+
+        //getData
+        $('.get_data').dblclick(function () {
+            var linelst = $(this).children();
+            hostip = $(linelst[1]).text();
+            expid = $(linelst[2]).text();
+            query_from = $(linelst[3]).text();
+            query = $(linelst[4]).text();
+            $('#inputHost').val(hostip);
+            $('#inputExpId').val(expid);
+            $('#query').val(query);
+            $('#query_from').val(query_from);
+        })
+
+    </script>
+{% endblock %}
+
+
