@@ -25,9 +25,10 @@ def auth(func):
 
 
 # @auth
+'''
 def debug(request):
     user_id = "zhangjingjun"
-    # user_id = request.COOKIES.get('uid')
+    #user_id = request.COOKIES.get('uid')
     if request.method == 'GET':
         page = request.GET.get('page')
         current_page = 1
@@ -98,6 +99,73 @@ def debug(request):
             ret['error'] = "Error:" + str(e)
             ret['status'] = False
         return HttpResponse(json.dumps(ret))
+
+'''
+def debug(request):
+    user_id = "zhangjingjun"
+    #user_id = request.COOKIES.get('uid')
+    if request.method == 'GET':
+        page = request.GET.get('page')
+        current_page = 1
+        if page:
+            current_page = int(page)
+        try:
+            # req_list = models.DebugQo.objects.filter(user_fk_id=user_id)
+            req_list = models.DebugQo.objects.order_by('id')[::-1]
+            page_obj = pagination.Page(current_page, len(req_list), 8, 5)
+            data = req_list[page_obj.start:page_obj.end]
+            page_str = page_obj.page_str("/webqo/debug?page=")
+        except Exception as e:
+            print(e)
+            pass
+        return render(request, 'webqo/debug.html', {'user_id': user_id, 'req_lst': data, 'page_str': page_str})
+
+    elif request.method == 'POST':
+        ret = {
+            'status': True,
+            'error': None,
+            'data': None
+        }
+        inputHost = request.POST.get('inputHost')
+        query_from = request.POST.get('query_from')
+        query = request.POST.get('query')
+
+
+        if query_from == '':
+            query_from = 'web'
+        else:
+            query_from = query_from
+
+        query_from = query_from.encode('utf-16LE')
+
+        utf16_query = query.encode('utf-16LE', 'ignore')
+
+        params = {
+            'queryString': utf16_query,
+            'queryFrom': query_from,
+        }
+
+        headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
+
+        try:
+            resp = requests.post(inputHost, data=params, headers=headers)
+            status = resp.reason
+            if status != 'OK':
+                print(sys.stderr, query, status)
+                ret['error'] = 'Error:未知的请求类型'
+                ret['status'] = False
+                return ret
+            data = BeautifulSoup(resp.text)
+            ret['data'] = data.prettify()
+
+        except Exception as e:
+            print(e)
+            print(sys.stderr, sys.exc_info()[0], sys.exc_info()[1])
+            ret['error'] = "Error:" + str(e)
+            ret['status'] = False
+        return HttpResponse(json.dumps(ret))
+
+
 
 
 def debug_diff(request):
@@ -406,8 +474,7 @@ def auto(request, page_id):
     data = task_list[page_obj.start:page_obj.end]
     page_str = page_obj.page_str("webqo/auto")
 
-    return render(request, 'webqo/auto.html',
-                  {'user_id': user_id, 'req_lst': data, 'page_str': page_str})
+    return render(request, 'webqo/auto.html',{'user_id': user_id, 'req_lst': data, 'page_str': page_str})
 
 
 def get_now_time():
