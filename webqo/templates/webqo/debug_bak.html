@@ -12,12 +12,12 @@
                         <div class="form-group col-md-6">
                             <label class="control-label">Single:</label>
                             <input class="form-control" type="text" id="inputHost" name="inputHost"
-                                   value="http://cache01.tupu.djt.ted:5555">
+                                   value="http://webqo01.web.djt.ted:8012/request">
                         </div>
                         <div class="form-group col-md-3">
                             <label class="control-label">&nbsp;</label>
-                            <input class="form-control" type="text" id="forceQuery" name="forceQuery"
-                                   placeholder="forceQuery">
+                            <input class="form-control" type="text" id="inputExpId" name="inputExpId"
+                                   placeholder="ExpId">
                         </div>
                         <div class="form-group col-md-3">
                             <label class="control-label">&nbsp;</label>
@@ -28,12 +28,12 @@
                         <div class="form-group col-md-6">
                             <label class="control-label">Diff:</label>
                             <input class="form-control" type="text" id="inputHost_diff" name="inputHost_diff"
-                                   value="http://cache01.tupu.1.djt.ted:5555">
+                                   value="http://webqo01.web.djt.ted:8012/request">
                         </div>
                         <div class="form-group col-md-3">
                             <label class="control-label">&nbsp;</label>
-                            <input class="form-control" type="text" id="forceQuery_diff" name="forceQuery_diff"
-                                   placeholder="forceQuery">
+                            <input class="form-control" type="text" id="inputExpId_diff" name="inputExpId_diff"
+                                   placeholder="ExpId">
                         </div>
                         <div class="form-group col-md-3">
                             <label class="control-label">&nbsp;</label>
@@ -173,7 +173,7 @@
             var query = $('#query').val()
             var inputHost = $('#inputHost').val()
             var query_from = $('#query_from').val()
-            var forceQuery = $('#forceQuery').val()
+            var inputExpId = $('#inputExpId').val()
 
             if (query != "" && inputHost != "") {
                 $.ajax({
@@ -213,13 +213,12 @@
         //diff
         $('#start_diff').click(function () {
             var query = $('#query').val()
-
-            var inputHost = $('#inputHost').val()
-            var forceQuery = $('#forceQuery').val()
             var query_from = $('#query_from').val()
+            var inputHost = $('#inputHost').val()
+            var inputExpId = $('#inputExpId').val()
 
             var inputHost_diff = $('#inputHost_diff').val()
-            var forceQuery_diff = $('#forceQuery_diff').val()
+            var inputExpId_diff = $('#inputExpId_diff').val()
             var query_from_diff = $('#query_from_diff').val()
 
             if (query != "" && inputHost != "" && inputHost_diff != "") {
@@ -230,11 +229,11 @@
                     traditional: true,
                     data: {
                         'inputHost': inputHost,
-                        'forceQuery': forceQuery,
+                        'inputExpId': inputExpId,
                         'query_from': query_from,
                         'query': query,
                         'inputHost_diff': inputHost_diff,
-                        'forceQuery_diff': forceQuery_diff,
+                        'inputExpId_diff': inputExpId_diff,
                         'query_from_diff': query_from_diff
                     },
                     dataType: 'JSON',
@@ -320,11 +319,11 @@
         $('.get_data').dblclick(function () {
             var linelst = $(this).children();
             hostip = $(linelst[1]).text();
-            forceQuery = $(linelst[2]).text();
+            expid = $(linelst[2]).text();
             query_from = $(linelst[3]).text();
             query = $(linelst[4]).text();
             $('#inputHost').val(hostip);
-            $('#forceQuery').val(forceQuery);
+            $('#inputExpId').val(expid);
             $('#query').val(query);
             $('#query_from').val(query_from);
         })

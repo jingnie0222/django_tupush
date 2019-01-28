@@ -2,11 +2,13 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.forms.models import model_to_dict
 from webqo import models
 from utils import pagination
+from utils import urlhandle
 import time, json
 import requests
 import sys
 from bs4 import BeautifulSoup
 import difflib
+import re
 
 
 # Create your views here.
@@ -25,82 +27,7 @@ def auth(func):
 
 
 # @auth
-'''
-def debug(request):
-    user_id = "zhangjingjun"
-    #user_id = request.COOKIES.get('uid')
-    if request.method == 'GET':
-        page = request.GET.get('page')
-        current_page = 1
-        if page:
-            current_page = int(page)
-        try:
-            # req_list = models.DebugQo.objects.filter(user_fk_id=user_id)
-            req_list = models.DebugQo.objects.order_by('id')[::-1]
-            page_obj = pagination.Page(current_page, len(req_list), 8, 5)
-            data = req_list[page_obj.start:page_obj.end]
-            page_str = page_obj.page_str("/webqo/debug?page=")
-        except Exception as e:
-            print(e)
-            pass
-        return render(request, 'webqo/debug.html', {'user_id': user_id, 'req_lst': data, 'page_str': page_str})
 
-    elif request.method == 'POST':
-        ret = {
-            'status': True,
-            'error': None,
-            'data': None
-        }
-        inputHost = request.POST.get('inputHost')
-        inputExpId = request.POST.get('inputExpId')
-        query_from = request.POST.get('query_from')
-        query = request.POST.get('query')
-
-        if inputExpId == '':
-            inputExpId = 0
-        else:
-            inputExpId = inputExpId
-
-        if query_from == '':
-            query_from = 0
-        else:
-            query_from = query_from
-
-        query_from = hex(int(query_from)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-        query_from = query_from.encode('utf-16LE')
-
-        exp_id = hex(int(inputExpId)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-        exp_id = exp_id.encode('utf-16LE')
-
-        utf16_query = query.encode('utf-16LE', 'ignore')
-
-        params = {
-            'queryString': utf16_query,
-            'queryFrom': query_from,
-            'exp_id': exp_id
-        }
-
-        headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
-
-        try:
-            resp = requests.post(inputHost, data=params, headers=headers)
-            status = resp.reason
-            if status != 'OK':
-                print(sys.stderr, query, status)
-                ret['error'] = 'Error:未知的请求类型'
-                ret['status'] = False
-                return ret
-            data = BeautifulSoup(resp.text)
-            ret['data'] = data.prettify()
-
-        except Exception as e:
-            print(e)
-            print(sys.stderr, sys.exc_info()[0], sys.exc_info()[1])
-            ret['error'] = "Error:" + str(e)
-            ret['status'] = False
-        return HttpResponse(json.dumps(ret))
-
-'''
 def debug(request):
     user_id = "zhangjingjun"
     #user_id = request.COOKIES.get('uid')
@@ -128,33 +55,38 @@ def debug(request):
         }
         inputHost = request.POST.get('inputHost')
         query_from = request.POST.get('query_from')
+        forceQuery = request.POST.get('forceQuery')
         query = request.POST.get('query')
 
+        if forceQuery == '':
+            forceQuery = '0'
+        else:
+            forceQuery = forceQuery
 
         if query_from == '':
             query_from = 'web'
         else:
             query_from = query_from
 
-        query_from = query_from.encode('utf-16LE')
-
-        utf16_query = query.encode('utf-16LE', 'ignore')
-
         params = {
-            'queryString': utf16_query,
+            'queryString': query,
             'queryFrom': query_from,
+            'forceQuery': forceQuery,
         }
+
+        params_gbk = urlhandle.urlencode(params, 'gbk', 'ignore')
 
         headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
 
         try:
-            resp = requests.post(inputHost, data=params, headers=headers)
+            resp = requests.post(inputHost, data=params_gbk, headers=headers)
             status = resp.reason
             if status != 'OK':
                 print(sys.stderr, query, status)
                 ret['error'] = 'Error:未知的请求类型'
                 ret['status'] = False
                 return ret
+
             data = BeautifulSoup(resp.text)
             ret['data'] = data.prettify()
 
@@ -175,64 +107,57 @@ def debug_diff(request):
         'data': None
     }
     inputHost = request.POST.get('inputHost')
-    inputExpId = request.POST.get('inputExpId')
+    forceQuery = request.POST.get('forceQuery')
     query_from = request.POST.get('query_from')
+
     inputHost_diff = request.POST.get('inputHost_diff')
-    inputExpId_diff = request.POST.get('inputExpId_diff')
+    forceQuery_diff = request.POST.get('forceQuery_diff')
     query_from_diff = request.POST.get('query_from_diff')
+
     query = request.POST.get('query')
 
-    if inputExpId == '':
-        inputExpId = 0
+    if forceQuery == '':
+        forceQuery = '0'
     else:
-        inputExpId = inputExpId
+        forceQuery = forceQuery
 
-    if inputExpId_diff == '':
-        inputExpId_diff = 0
+    if forceQuery_diff == '':
+        forceQuery_diff = '0'
     else:
-        inputExpId_diff = inputExpId_diff
+        forceQuery_diff = forceQuery_diff
 
     if query_from == '':
-        query_from = 0
+        query_from = 'web'
     else:
         query_from = query_from
 
     if query_from_diff == '':
-        query_from_diff = 0
+        query_from_diff = 'web'
     else:
         query_from_diff = query_from_diff
 
-    query_from = hex(int(query_from)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-    query_from = query_from.encode('utf-16LE')
-
-    query_from_diff = hex(int(query_from_diff)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-    query_from_diff = query_from_diff.encode('utf-16LE')
-
-    exp_id = hex(int(inputExpId)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-    exp_id = exp_id.encode('utf-16LE')
-
-    exp_id_diff = hex(int(inputExpId_diff)).split('0x')[1] + "^0^0^0^0^0^0^0^0"
-    exp_id_diff = exp_id_diff.encode('utf-16LE')
-
-    utf16_query = query.encode('utf-16LE', 'ignore')
 
     params = {
-        'queryString': utf16_query,
+        'queryString': query,
         'queryFrom': query_from,
-        'exp_id': exp_id
+        'forceQuery': forceQuery,
     }
 
     params_diff = {
-        'queryString': utf16_query,
+        'queryString': query,
         'queryFrom': query_from_diff,
-        'exp_id': exp_id_diff
+        'forceQuery': forceQuery_diff,
     }
+
+    params_gbk = urlhandle.urlencode(params, 'gbk', 'ignore')
+
+    params_diff_gbk = urlhandle.urlencode(params_diff, 'gbk', 'ignore')
 
     headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
 
     try:
-        resp = requests.post(inputHost, data=params, headers=headers)
-        resp_diff = requests.post(inputHost_diff, data=params_diff, headers=headers)
+        resp = requests.post(inputHost, data=params_gbk, headers=headers)
+        resp_diff = requests.post(inputHost_diff, data=params_diff_gbk, headers=headers)
         status = resp.reason
         status_diff = resp_diff.reason
         if status != 'OK' or status_diff != 'OK':
@@ -245,6 +170,9 @@ def debug_diff(request):
         diff = difflib.HtmlDiff()
         ret['data'] = diff.make_table(data.prettify().splitlines(), data_diff.prettify().splitlines()).replace(
             'nowrap="nowrap"', '')
+
+        #add part diff
+
 
     except Exception as e:
         print(e)
