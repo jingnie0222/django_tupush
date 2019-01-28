@@ -2,7 +2,7 @@
 {% block content %}
     {% load static %}
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="tile">
                 <div class="tile-body">
                     <h3 class="tile-title">请求调试&nbsp;&nbsp;&nbsp;<span style="color:red;font-size:15px;"
@@ -58,10 +58,23 @@
                     <button class="btn btn-primary" id="start_diff" type="button"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>diff
                     </button>
+                    &nbsp;&nbsp;
+                    <button class="btn btn-primary" id="jzwd_diff" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>精准问答diff
+                    </button>
+                    &nbsp;&nbsp;
+                    <button class="btn btn-primary" id="rec_diff" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>右侧推荐diff
+                    </button>
+                    &nbsp;&nbsp;
+                    <button class="btn btn-primary" id="int_diff" type="button"><i
+                            class="fa fa-fw fa-lg fa-check-circle"></i>兴趣推荐diff
+                    </button>
+
                 </div>
 
             </div>
-            <div class="tile">
+            <!--div class="tile">
                 <h3 class="tile-title">列表</h3>
                 <table class="table" id="reqData">
                     <thead>
@@ -95,8 +108,10 @@
                     </ul>
                 </nav>
             </div>
-        </div>
-        <div class="col-md-6">
+        </div-->
+
+
+        <div class="col-md-12">
             <div class="tile" style="height: 690px;overflow-y: scroll">
                 <h3 class="tile-title">结果</h3>
                 <textarea class="form-control" rows="27" id="result" name="result"></textarea>
@@ -109,6 +124,7 @@
         </div>
 
     </div>
+
 {% endblock %}
 {% block js %}
     <script>
