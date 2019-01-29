@@ -160,31 +160,6 @@ def debug_diff(request):
     params_diff_gbk = urlhandle.urlencode(params_diff, 'gbk', 'ignore')
 
     headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
-    '''
-    try:
-        resp = requests.post(inputHost, data=params_gbk, headers=headers)
-        resp_diff = requests.post(inputHost_diff, data=params_diff_gbk, headers=headers)
-        status = resp.reason
-        status_diff = resp_diff.reason
-        if status != 'OK' or status_diff != 'OK':
-            print(sys.stderr, query, status, status_diff)
-            ret['error'] = 'Error:未知的请求类型'
-            ret['status'] = False
-            return ret
-        data = BeautifulSoup(resp.text)
-        data_diff = BeautifulSoup(resp_diff.text)
-        diff = difflib.HtmlDiff()
-        ret['data'] = diff.make_table(data.prettify().splitlines(), data_diff.prettify().splitlines()).replace(
-            'nowrap="nowrap"', '')
-
-
-    except Exception as e:
-        print(e)
-        print(sys.stderr, sys.exc_info()[0], sys.exc_info()[1])
-        ret['error'] = "Error:" + str(e)
-        ret['status'] = False
-    return HttpResponse(json.dumps(ret))
-    '''
 
     try:
         resp = requests.post(inputHost, data=params_gbk, headers=headers)
@@ -473,10 +448,4 @@ def auto(request, page_id):
     return render(request, 'webqo/auto.html',{'user_id': user_id, 'req_lst': data, 'page_str': page_str})
 
 
-def get_now_time():
-    timeArray = time.localtime()
-    return time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
 
-
-def str_dos2unix(input):
-    return input.replace('\r\n', '\n').replace(' ', '')
