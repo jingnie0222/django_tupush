@@ -201,6 +201,10 @@ def debug_diff(request):
         total = BeautifulSoup(resp.text)
         total_diff = BeautifulSoup(resp_diff.text)
 
+        jzwd = jzwd_diff = BeautifulSoup("精准问答结果为空")
+        rec = rec_diff = BeautifulSoup("右侧推荐结果为空")
+        int = int_diff = BeautifulSoup("兴趣推荐结果为空")
+
         for doc in total.find_all('doc'):
             pvtype = doc.item['pvtype']
             if re.search(r'[^ ]*_[^ ]*_[^ ]*', pvtype):
@@ -226,6 +230,7 @@ def debug_diff(request):
                 continue
 
         diff = difflib.HtmlDiff()
+
         data['total_data'] = diff.make_table(total.prettify().splitlines(), total_diff.prettify().splitlines()).replace(
             'nowrap="nowrap"', '')
         data['jzwd_data'] = diff.make_table(jzwd.prettify().splitlines(), jzwd_diff.prettify().splitlines()).replace(
@@ -237,7 +242,6 @@ def debug_diff(request):
 
         ret['data'] = data
 
-        print(ret['data']['jzwd_data'])
 
     except Exception as e:
         print(e)

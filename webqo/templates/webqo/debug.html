@@ -86,15 +86,16 @@
 	              <div class="tab-content" id="myTabContent">
 	                <div class="tab-pane fade active show" id="all_diff">
 	                  <textarea class="form-control" rows="27" id="result" name="result"></textarea>
+	                  <div id="result_diff"></div>
 	                </div>
 	                <div class="tab-pane fade" id="accurate_diff">
-	                  <textarea class="form-control" rows="27" id="jzwd_result" name="jzwd_result"></textarea>
+	                  <div id="jzwd_result"></div>
 	                </div>
 	                <div class="tab-pane fade" id="right_diff">
-	                  <textarea class="form-control" rows="27" id="rec_result" name="rec_result"></textarea>
+	                  <div id="rec_result"></div>
 	                </div>
 	                <div class="tab-pane fade" id="interest_diff">
-	                  <textarea class="form-control" rows="27" id="int_result" name="int_result"></textarea>
+	                  <div id="int_result"></div>
 	                </div>
 	              </div>
 	            </div>
@@ -246,8 +247,11 @@
                     dataType: 'JSON',
                     success: function (ret) {
                         if (ret.status) {
-                            $('#result').show()
-                            $('#result').html(ret.data.total_data)
+                            $('#result').hide()
+                            $('#result_diff').html(ret.data.total_data)
+                            $('#jzwd_result').html(ret.data.jzwd_data)
+                            $('#rec_result').html(ret.data.rec_data)
+                            $('#int_result').html(ret.data.int_data)
                         } else {
                             $('#error_xml').text(ret.error)
                         }
@@ -266,23 +270,6 @@
                 }
             }
         })
-
-        //jzwd_diff
-        $('#accurate_diff').click(function () {
-            $.ajax({
-                success: function (ret) {
-                    if (ret.status) {
-                        $('#jzwd_result').show()
-                        $('#jzwd_result').html(ret.data.jzwd_data)
-                    } else {
-                        $('#error_xml').text(ret.error)
-                    }
-                },
-                error: function () {
-                },
-            });
-            $('#error_xml').text('');
-            })
 
         //table hover
         $(function () {
