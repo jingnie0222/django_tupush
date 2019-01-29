@@ -58,7 +58,7 @@
                     <button class="btn btn-primary" id="start_diff" type="button"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>diff
                     </button>
-                    &nbsp;&nbsp;
+                    <!--&nbsp;&nbsp;
                     <button class="btn btn-primary" id="jzwd_diff" type="button"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>精准问答diff
                     </button>
@@ -69,54 +69,41 @@
                     &nbsp;&nbsp;
                     <button class="btn btn-primary" id="int_diff" type="button"><i
                             class="fa fa-fw fa-lg fa-check-circle"></i>兴趣推荐diff
-                    </button>
-
+                    </button>-->
                 </div>
 
             </div>
-            <!--div class="tile">
+            <div class="tile">
                 <h3 class="tile-title">列表</h3>
-                <table class="table" id="reqData">
-                    <thead>
-                    <tr>
-                        <th>时间</th>
-                        <th>Host</th>
-                        <th>ExpId</th>
-                        <th>queryFrom</th>
-                        <th>请求</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody id="reqBody">
-                    {% for item in req_lst %}
-                        <tr req_id="{{ item.id }}" class="get_data">
-                            <td>{{ item.c_time | date:"Y/m/d H:i" }}</td>
-                            <td>{{ item.host_ip }}</td>
-                            <td>{{ item.exp_id }}</td>
-                            <td>{{ item.query_from }}</td>
-                            <td>{{ item.query }}</td>
-                            <td>
-                                <button class="del_debug">删除</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        {{ page_str }}
-                    </ul>
-                </nav>
+                <!--<div class="tile" style="height: 690px;overflow-y: scroll">-->
+                <div class="bs-component">
+	              <ul class="nav nav-tabs">
+	                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#all_diff">All</a></li>
+	                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#accurate_diff">精准问答</a></li>
+	                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#right_diff">右侧推荐</a></li>
+	                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#interest_diff">兴趣推荐</a></li>
+	              </ul>
+	              <div class="tab-content" id="myTabContent">
+	                <div class="tab-pane fade active show" id="all_diff">
+	                  <textarea class="form-control" rows="27" id="result" name="result"></textarea>
+	                </div>
+	                <div class="tab-pane fade" id="accurate_diff">
+	                  <textarea class="form-control" rows="27" id="jzwd_result" name="jzwd_result"></textarea>
+	                </div>
+	                <div class="tab-pane fade" id="right_diff">
+	                  <textarea class="form-control" rows="27" id="rec_result" name="rec_result"></textarea>
+	                </div>
+	                <div class="tab-pane fade" id="interest_diff">
+	                  <textarea class="form-control" rows="27" id="int_result" name="int_result"></textarea>
+	                </div>
+	              </div>
+	            </div>
             </div>
-        </div-->
+        </div
 
 
         <div class="col-md-12">
-            <div class="tile" style="height: 690px;overflow-y: scroll">
-                <h3 class="tile-title">结果</h3>
-                <textarea class="form-control" rows="27" id="result" name="result"></textarea>
-                <div id="result_diff"></div>
-            </div>
+            
         </div>
         <div class="clearfix"></div>
         <div class="col-md-6">
@@ -201,7 +188,10 @@
                     dataType: 'JSON',
                     success: function (ret) {
                         if (ret.status) {
-                            $('#result_diff').hide()
+                            $('#accurate_diff').hide()
+                            $('#right_diff').hide()
+                            $('#interest_diff').hide()
+                            $('#all_diff').show
                             $('#result').show()
                             $('#result').text(ret.data)
                         } else {
@@ -256,9 +246,8 @@
                     dataType: 'JSON',
                     success: function (ret) {
                         if (ret.status) {
-                            $('#result').hide()
-                            $('#result_diff').show()
-                            $('#result_diff').html(ret.data)
+                            $('#result').show()
+                            $('#result').html(ret.data.total_data)
                         } else {
                             $('#error_xml').text(ret.error)
                         }
@@ -277,6 +266,23 @@
                 }
             }
         })
+
+        //jzwd_diff
+        $('#accurate_diff').click(function () {
+            $.ajax({
+                success: function (ret) {
+                    if (ret.status) {
+                        $('#jzwd_result').show()
+                        $('#jzwd_result').html(ret.data.jzwd_data)
+                    } else {
+                        $('#error_xml').text(ret.error)
+                    }
+                },
+                error: function () {
+                },
+            });
+            $('#error_xml').text('');
+            })
 
         //table hover
         $(function () {

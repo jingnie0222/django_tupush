@@ -101,6 +101,12 @@ def debug(request):
 
 
 def debug_diff(request):
+    data = {
+        'total_data': None,
+        'jzwd_data': None,
+        'rec_data': None,
+        'int_data': None,
+    }
     ret = {
         'status': True,
         'error': None,
@@ -154,7 +160,7 @@ def debug_diff(request):
     params_diff_gbk = urlhandle.urlencode(params_diff, 'gbk', 'ignore')
 
     headers = {"Content-type": "application/x-www-form-urlencoded;charset=UTF-16LE"}
-
+    '''
     try:
         resp = requests.post(inputHost, data=params_gbk, headers=headers)
         resp_diff = requests.post(inputHost_diff, data=params_diff_gbk, headers=headers)
@@ -171,8 +177,6 @@ def debug_diff(request):
         ret['data'] = diff.make_table(data.prettify().splitlines(), data_diff.prettify().splitlines()).replace(
             'nowrap="nowrap"', '')
 
-        #add part diff
-
 
     except Exception as e:
         print(e)
@@ -180,7 +184,67 @@ def debug_diff(request):
         ret['error'] = "Error:" + str(e)
         ret['status'] = False
     return HttpResponse(json.dumps(ret))
+    '''
 
+    try:
+        resp = requests.post(inputHost, data=params_gbk, headers=headers)
+        resp_diff = requests.post(inputHost_diff, data=params_diff_gbk, headers=headers)
+        status = resp.reason
+        status_diff = resp_diff.reason
+
+        if status != 'OK' or status_diff != 'OK':
+            print(sys.stderr, query, status, status_diff)
+            ret['error'] = 'Error:未知的请求类型'
+            ret['status'] = False
+            return ret
+
+        total = BeautifulSoup(resp.text)
+        total_diff = BeautifulSoup(resp_diff.text)
+
+        for doc in total.find_all('doc'):
+            pvtype = doc.item['pvtype']
+            if re.search(r'[^ ]*_[^ ]*_[^ ]*', pvtype):
+                jzwd = doc
+                continue
+            if re.search(r'[^ ]*_[^ ]*', pvtype):
+                rec = doc
+                continue
+            if '13' == pvtype:
+                int = doc
+                continue
+
+        for doc in total_diff.find_all('doc'):
+            pvtype = doc.item['pvtype']
+            if re.search(r'[^ ]*_[^ ]*_[^ ]*', pvtype):
+                jzwd_diff = doc
+                continue
+            if re.search(r'[^ ]*_[^ ]*', pvtype):
+                rec_diff = doc
+                continue
+            if '13' == pvtype:
+                int_diff = doc
+                continue
+
+        diff = difflib.HtmlDiff()
+        data['total_data'] = diff.make_table(total.prettify().splitlines(), total_diff.prettify().splitlines()).replace(
+            'nowrap="nowrap"', '')
+        data['jzwd_data'] = diff.make_table(jzwd.prettify().splitlines(), jzwd_diff.prettify().splitlines()).replace(
+            'nowrap="nowrap"', '')
+        data['rec_data'] = diff.make_table(rec.prettify().splitlines(), rec_diff.prettify().splitlines()).replace(
+            'nowrap="nowrap"', '')
+        data['int_data'] = diff.make_table(int.prettify().splitlines(), int_diff.prettify().splitlines()).replace(
+            'nowrap="nowrap"', '')
+
+        ret['data'] = data
+
+        print(ret['data']['jzwd_data'])
+
+    except Exception as e:
+        print(e)
+        print(sys.stderr, sys.exc_info()[0], sys.exc_info()[1])
+        ret['error'] = "Error:" + str(e)
+        ret['status'] = False
+    return HttpResponse(json.dumps(ret))
 
 # @auth
 def debug_save(request):
